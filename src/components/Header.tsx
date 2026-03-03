@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const { user, logout } = useAuth();
 
   useEffect(() => {
@@ -17,6 +18,19 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // 从 localStorage 获取购物车数量
+    const updateCartCount = () => {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const count = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
+      setCartCount(count);
+    };
+
+    updateCartCount();
+    window.addEventListener('storage', updateCartCount);
+    return () => window.removeEventListener('storage', updateCartCount);
   }, []);
 
   const navItems = [
@@ -105,13 +119,18 @@ export default function Header() {
               <button className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
                 <Search size={20} />
               </button>
-              <button className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
+              <Link href="/cart" className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors">
                 <ShoppingCart size={20} />
-              </button>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
               {user && (
-                <button className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
+                <Link href="/profile" className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
                   <User size={20} />
-                </button>
+                </Link>
               )}
               {/* 移动端菜单按钮 */}
               <button

@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inspector } from 'react-dev-inspector';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export const metadata: Metadata = {
   title: {
@@ -45,10 +47,14 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`antialiased bg-white`}>
-        <AuthProvider>
-          {isDev && <Inspector />}
-          {children}
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <ToastProvider>
+              {isDev && <Inspector />}
+              {children}
+            </ToastProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
