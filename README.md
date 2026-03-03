@@ -1,60 +1,172 @@
-# projects
+# 与风同行官网
 
-这是一个基于 [Next.js 16](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) 的全栈应用项目，由扣子编程 CLI 创建。
+> 仿小米风格的科技公司官网，包含完整的产品展示、用户认证和智能客服功能。
+
+## 项目简介
+
+与风同行是一家专注于智能硬件与软件创新的科技公司，本官网展示了公司的产品、服务和品牌理念。
+
+### 主要功能
+
+- ✅ 产品展示（手机、电视、笔记本、智能家居、云服务）
+- ✅ 用户注册/登录（JWT 认证 + 密码加密）
+- ✅ 智能客服"小风"（AI 对话）
+- ✅ 新闻资讯
+- ✅ 服务支持（维修、退换货、FAQ）
+- ✅ 全端响应式设计
+- ✅ SEO 优化
+
+## 技术栈
+
+| 技术 | 版本 | 用途 |
+|------|------|------|
+| Next.js | 16.1.1 | React 框架 |
+| React | 19.2.3 | UI 库 |
+| TypeScript | 5.x | 类型安全 |
+| Tailwind CSS | 4.x | 样式框架 |
+| shadcn/ui | Latest | UI 组件库 |
+| Supabase | Latest | 数据库与认证 |
+| bcryptjs | 3.0.3 | 密码加密 |
+| jsonwebtoken | 9.0.3 | JWT 认证 |
 
 ## 快速开始
+
+### 前置要求
+
+- Node.js >= 18.0.0
+- pnpm >= 8.0.0
+
+### 安装依赖
+
+```bash
+pnpm install
+```
+
+### 配置环境变量
+
+复制 `.env.example` 为 `.env.local`，并填入你的配置：
+
+```bash
+cp .env.example .env.local
+```
+
+**必需的环境变量：**
+
+```env
+# Supabase 配置
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# JWT 密钥
+JWT_SECRET=your-random-secret-key
+
+# 应用配置
+NEXT_PUBLIC_APP_URL=http://localhost:5000
+NODE_ENV=development
+```
 
 ### 启动开发服务器
 
 ```bash
-coze dev
+pnpm dev
 ```
 
-启动后，在浏览器中打开 [http://localhost:5000](http://localhost:5000) 查看应用。
-
-开发服务器支持热更新，修改代码后页面会自动刷新。
+访问 [http://localhost:5000](http://localhost:5000) 查看应用。
 
 ### 构建生产版本
 
 ```bash
-coze build
+pnpm build
 ```
 
 ### 启动生产服务器
 
 ```bash
-coze start
+pnpm start
 ```
 
 ## 项目结构
 
 ```
 src/
-├── app/                      # Next.js App Router 目录
-│   ├── layout.tsx           # 根布局组件
-│   ├── page.tsx             # 首页
-│   ├── globals.css          # 全局样式（包含 shadcn 主题变量）
-│   └── [route]/             # 其他路由页面
-├── components/              # React 组件目录
-│   └── ui/                  # shadcn/ui 基础组件（优先使用）
-│       ├── button.tsx
-│       ├── card.tsx
-│       └── ...
-├── lib/                     # 工具函数库
-│   └── utils.ts            # cn() 等工具函数
-└── hooks/                   # 自定义 React Hooks（可选）
+├── app/                      # Next.js App Router
+│   ├── api/                  # API 路由
+│   │   └── auth/             # 认证相关 API
+│   │       ├── login/        # 登录
+│   │       ├── register/     # 注册
+│   │       ├── me/           # 获取用户信息
+│   │       └── logout/       # 登出
+│   ├── about/                # 关于我们
+│   ├── products/             # 产品展示
+│   ├── news/                 # 新闻资讯
+│   ├── login/                # 登录页面
+│   ├── register/             # 注册页面
+│   ├── orders/               # 订单管理
+│   ├── ai-assistant/         # AI 智能客服
+│   └── layout.tsx            # 根布局
+├── components/               # React 组件
+│   ├── ui/                   # shadcn/ui 基础组件
+│   ├── Header.tsx            # 页头导航
+│   ├── Footer.tsx            # 页脚
+│   └── ProductGrid.tsx       # 产品网格
+├── contexts/                 # React Context
+│   └── AuthContext.tsx       # 认证上下文
+├── storage/                  # 数据存储
+│   └── database/             # 数据库相关
+│       └── shared/           # 共享数据库模型
+│           └── schema.ts     # 数据库 Schema
+└── lib/                      # 工具函数
 ```
 
-## 核心开发规范
+## 核心功能说明
 
-### 1. 组件开发
+### 用户认证系统
 
-**优先使用 shadcn/ui 基础组件**
+基于 JWT 和 httpOnly Cookie 的安全认证系统：
 
-本项目已预装完整的 shadcn/ui 组件库，位于 `src/components/ui/` 目录。开发时应优先使用这些组件作为基础：
+1. **注册**
+   - 邮箱密码注册
+   - 密码 bcrypt 加密存储
+   - 自动生成 JWT token
+
+2. **登录**
+   - 邮箱密码验证
+   - JWT token 认证
+   - 7 天有效期
+
+3. **会话管理**
+   - httpOnly Cookie 存储 token
+   - 自动刷新用户信息
+   - 安全登出
+
+**API 端点：**
+
+```typescript
+POST /api/auth/register  // 注册
+POST /api/auth/login     // 登录
+GET  /api/auth/me        // 获取当前用户
+POST /api/auth/logout    // 登出
+```
+
+### 数据库 Schema
+
+```typescript
+users {
+  id: varchar(36) PK
+  email: varchar(255) UNIQUE
+  password: varchar(255)
+  name: varchar(128)
+  created_at: timestamp
+  updated_at: timestamp
+}
+```
+
+## 开发规范
+
+### 1. 使用 shadcn/ui 组件
 
 ```tsx
-// ✅ 推荐：使用 shadcn 基础组件
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -72,79 +184,28 @@ export default function MyComponent() {
 }
 ```
 
-**可用的 shadcn 组件清单**
-
-- 表单：`button`, `input`, `textarea`, `select`, `checkbox`, `radio-group`, `switch`, `slider`
-- 布局：`card`, `separator`, `tabs`, `accordion`, `collapsible`, `scroll-area`
-- 反馈：`alert`, `alert-dialog`, `dialog`, `toast`, `sonner`, `progress`
-- 导航：`dropdown-menu`, `menubar`, `navigation-menu`, `context-menu`
-- 数据展示：`table`, `avatar`, `badge`, `hover-card`, `tooltip`, `popover`
-- 其他：`calendar`, `command`, `carousel`, `resizable`, `sidebar`
-
-详见 `src/components/ui/` 目录下的具体组件实现。
-
 ### 2. 路由开发
-
-Next.js 使用文件系统路由，在 `src/app/` 目录下创建文件夹即可添加路由：
-
-```bash
-# 创建新路由 /about
-src/app/about/page.tsx
-
-# 创建动态路由 /posts/[id]
-src/app/posts/[id]/page.tsx
-
-# 创建路由组（不影响 URL）
-src/app/(marketing)/about/page.tsx
-
-# 创建 API 路由
-src/app/api/users/route.ts
-```
-
-**页面组件示例**
 
 ```tsx
 // src/app/about/page.tsx
-import { Button } from '@/components/ui/button';
-
 export const metadata = {
   title: '关于我们',
   description: '关于页面描述',
 };
 
 export default function AboutPage() {
-  return (
-    <div>
-      <h1>关于我们</h1>
-      <Button>了解更多</Button>
-    </div>
-  );
+  return <div>关于我们</div>;
 }
 ```
 
-**动态路由示例**
+### 3. API 路由
 
 ```tsx
-// src/app/posts/[id]/page.tsx
-export default async function PostPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-
-  return <div>文章 ID: {id}</div>;
-}
-```
-
-**API 路由示例**
-
-```tsx
-// src/app/api/users/route.ts
+// src/app/api/example/route.ts
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  return NextResponse.json({ users: [] });
+  return NextResponse.json({ data: [] });
 }
 
 export async function POST(request: Request) {
@@ -153,206 +214,109 @@ export async function POST(request: Request) {
 }
 ```
 
-### 3. 依赖管理
-
-**必须使用 pnpm 管理依赖**
+### 4. 依赖管理
 
 ```bash
-# ✅ 安装依赖
+# ✅ 使用 pnpm
 pnpm install
-
-# ✅ 添加新依赖
 pnpm add package-name
-
-# ✅ 添加开发依赖
 pnpm add -D package-name
 
 # ❌ 禁止使用 npm 或 yarn
-# npm install  # 错误！
-# yarn add     # 错误！
 ```
 
-项目已配置 `preinstall` 脚本，使用其他包管理器会报错。
+## 部署指南
 
-### 4. 样式开发
+### Vercel 部署（推荐）
 
-**使用 Tailwind CSS v4**
+```bash
+# 1. 推送代码到 GitHub
+git push origin main
 
-本项目使用 Tailwind CSS v4 进行样式开发，并已配置 shadcn 主题变量。
-
-```tsx
-// 使用 Tailwind 类名
-<div className="flex items-center gap-4 p-4 rounded-lg bg-background">
-  <Button className="bg-primary text-primary-foreground">
-    主要按钮
-  </Button>
-</div>
-
-// 使用 cn() 工具函数合并类名
-import { cn } from '@/lib/utils';
-
-<div className={cn(
-  "base-class",
-  condition && "conditional-class",
-  className
-)}>
-  内容
-</div>
+# 2. 在 Vercel 中导入项目
+# 3. 配置环境变量
+# 4. 自动部署
 ```
 
-**主题变量**
+详细部署步骤请查看 [部署指南-从0到1上线完整指南.md](./部署指南-从0到1上线完整指南.md)
 
-主题变量定义在 `src/app/globals.css` 中，支持亮色/暗色模式：
+### Docker 部署
 
-- `--background`, `--foreground`
-- `--primary`, `--primary-foreground`
-- `--secondary`, `--secondary-foreground`
-- `--muted`, `--muted-foreground`
-- `--accent`, `--accent-foreground`
-- `--destructive`, `--destructive-foreground`
-- `--border`, `--input`, `--ring`
+```bash
+# 构建镜像
+docker-compose build
 
-### 5. 表单开发
+# 启动服务
+docker-compose up -d
 
-推荐使用 `react-hook-form` + `zod` 进行表单开发：
-
-```tsx
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-
-const formSchema = z.object({
-  username: z.string().min(2, '用户名至少 2 个字符'),
-  email: z.string().email('请输入有效的邮箱'),
-});
-
-export default function MyForm() {
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: { username: '', email: '' },
-  });
-
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-  };
-
-  return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Input {...form.register('username')} />
-      <Input {...form.register('email')} />
-      <Button type="submit">提交</Button>
-    </form>
-  );
-}
+# 查看日志
+docker-compose logs -f
 ```
 
-### 6. 数据获取
+### 传统服务器部署
 
-**服务端组件（推荐）**
+```bash
+# 安装依赖
+pnpm install
 
-```tsx
-// src/app/posts/page.tsx
-async function getPosts() {
-  const res = await fetch('https://api.example.com/posts', {
-    cache: 'no-store', // 或 'force-cache'
-  });
-  return res.json();
-}
+# 构建
+pnpm build
 
-export default async function PostsPage() {
-  const posts = await getPosts();
-
-  return (
-    <div>
-      {posts.map(post => (
-        <div key={post.id}>{post.title}</div>
-      ))}
-    </div>
-  );
-}
+# 使用 PM2 启动
+pm2 start ecosystem.config.js
 ```
 
-**客户端组件**
+## 性能优化
 
-```tsx
-'use client';
+- ✅ 图片懒加载
+- ✅ 代码分割
+- ✅ CDN 加速
+- ✅ Gzip 压缩
+- ✅ 数据库索引
+- ✅ 缓存策略
 
-import { useEffect, useState } from 'react';
+## 安全措施
 
-export default function ClientComponent() {
-  const [data, setData] = useState(null);
+- ✅ 密码 bcrypt 加密
+- ✅ JWT 认证
+- ✅ httpOnly Cookie
+- ✅ HTTPS
+- ✅ XSS 防护
+- ✅ CSRF 防护
+- ✅ Rate Limiting
 
-  useEffect(() => {
-    fetch('/api/data')
-      .then(res => res.json())
-      .then(setData);
-  }, []);
+## 浏览器支持
 
-  return <div>{JSON.stringify(data)}</div>;
-}
-```
+| 浏览器 | 版本 |
+|--------|------|
+| Chrome | 90+ |
+| Firefox | 88+ |
+| Safari | 14+ |
+| Edge | 90+ |
 
-## 常见开发场景
+## 贡献指南
 
-### 添加新页面
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
 
-1. 在 `src/app/` 下创建文件夹和 `page.tsx`
-2. 使用 shadcn 组件构建 UI
-3. 根据需要添加 `layout.tsx` 和 `loading.tsx`
+## 许可证
 
-### 创建业务组件
+本项目采用 MIT 许可证。
 
-1. 在 `src/components/` 下创建组件文件（非 UI 组件）
-2. 优先组合使用 `src/components/ui/` 中的基础组件
-3. 使用 TypeScript 定义 Props 类型
+## 联系方式
 
-### 添加全局状态
+- **官网**: https://yufeng.com
+- **技术支持**: tech@yufeng.com
+- **商务合作**: business@yufeng.com
 
-推荐使用 React Context 或 Zustand：
+## 更新日志
 
-```tsx
-// src/lib/store.ts
-import { create } from 'zustand';
+### v1.0.0 (2025-01-XX)
 
-interface Store {
-  count: number;
-  increment: () => void;
-}
-
-export const useStore = create<Store>((set) => ({
-  count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-}));
-```
-
-### 集成数据库
-
-推荐使用 Prisma 或 Drizzle ORM，在 `src/lib/db.ts` 中配置。
-
-## 技术栈
-
-- **框架**: Next.js 16.1.1 (App Router)
-- **UI 组件**: shadcn/ui (基于 Radix UI)
-- **样式**: Tailwind CSS v4
-- **表单**: React Hook Form + Zod
-- **图标**: Lucide React
-- **字体**: Geist Sans & Geist Mono
-- **包管理器**: pnpm 9+
-- **TypeScript**: 5.x
-
-## 参考文档
-
-- [Next.js 官方文档](https://nextjs.org/docs)
-- [shadcn/ui 组件文档](https://ui.shadcn.com)
-- [Tailwind CSS 文档](https://tailwindcss.com/docs)
-- [React Hook Form](https://react-hook-form.com)
-
-## 重要提示
-
-1. **必须使用 pnpm** 作为包管理器
-2. **优先使用 shadcn/ui 组件** 而不是从零开发基础组件
-3. **遵循 Next.js App Router 规范**，正确区分服务端/客户端组件
-4. **使用 TypeScript** 进行类型安全开发
-5. **使用 `@/` 路径别名** 导入模块（已配置）
+**初始发布**
+- ✅ 完成核心功能开发
+- ✅ 实现用户认证系统
+- ✅ 部署到生产环境

@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Menu, X, Search, ShoppingCart, User } from 'lucide-react';
+import { Menu, X, Search, ShoppingCart, User, LogOut } from 'lucide-react';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,15 +35,33 @@ export default function Header() {
       <div className="bg-gray-100 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-end items-center h-10 space-x-6 text-sm text-gray-600">
-            <Link href="/login" className="hover:text-orange-500 transition-colors">
-              登录
-            </Link>
-            <Link href="/register" className="hover:text-orange-500 transition-colors">
-              注册
-            </Link>
-            <Link href="/orders" className="hover:text-orange-500 transition-colors">
-              我的订单
-            </Link>
+            {user ? (
+              <>
+                <span className="text-gray-700">欢迎，{user.name || user.email}</span>
+                <Link href="/orders" className="hover:text-orange-500 transition-colors">
+                  我的订单
+                </Link>
+                <button
+                  onClick={logout}
+                  className="hover:text-orange-500 transition-colors flex items-center"
+                >
+                  <LogOut size={16} className="mr-1" />
+                  退出
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="hover:text-orange-500 transition-colors">
+                  登录
+                </Link>
+                <Link href="/register" className="hover:text-orange-500 transition-colors">
+                  注册
+                </Link>
+                <Link href="/orders" className="hover:text-orange-500 transition-colors">
+                  我的订单
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -88,9 +108,11 @@ export default function Header() {
               <button className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
                 <ShoppingCart size={20} />
               </button>
-              <button className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
-                <User size={20} />
-              </button>
+              {user && (
+                <button className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
+                  <User size={20} />
+                </button>
+              )}
               {/* 移动端菜单按钮 */}
               <button
                 className="md:hidden p-2 text-gray-600 hover:text-orange-500 transition-colors"
@@ -116,6 +138,23 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
+              {user && (
+                <div className="pt-4 pb-3 border-t border-gray-200">
+                  <p className="px-4 text-sm text-gray-600 mb-2">
+                    欢迎，{user.name || user.email}
+                  </p>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-colors flex items-center"
+                  >
+                    <LogOut size={16} className="mr-2" />
+                    退出登录
+                  </button>
+                </div>
+              )}
             </nav>
           </div>
         )}
